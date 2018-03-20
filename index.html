@@ -74,8 +74,7 @@
                 $(renderSong(id, videos[id])).appendTo('.card-deck');
             }
 
-            let left = i % 3;
-            for (let j = left; j > 0; j--) {
+            for (let j = i % 3; j > 0; j--) {
                 $(renderSong('', 'No song selected')).appendTo('.card-deck');
             }
 
