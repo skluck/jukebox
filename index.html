@@ -68,11 +68,11 @@
             for (const id in videos) {
                 i++;
                 $(renderSong(id, videos[id])).appendTo('.card-deck');
+            }
 
-                let left = 3 - (i % 3);
-                for (let j = 0; j < left; j++) {
-                    $(renderSong('', 'No song selected')).appendTo('.card-deck');
-                }
+            let left = 3 - (i % 3);
+            for (let j = 0; j < left; j++) {
+                $(renderSong('', 'No song selected')).appendTo('.card-deck');
             }
 
             $('.alert').remove();
