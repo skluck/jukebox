@@ -60,7 +60,7 @@
             let i = 0;
             for (const id in videos) {
                 i++;
-                $(renderJukeSong(id, videos[id])).appendTo('.card-deck');
+                $(renderSong(id, videos[id])).appendTo('.card-deck');
 
                 let left = 3 - (i % 3);
                 for (let j = 0; j < left; j++) {
