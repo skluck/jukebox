@@ -16,8 +16,8 @@
 
   <body>
 
-    <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-      <h1 class="display-4">Music Jukebox</h1>
+    <div class="px-3 py-3 mx-auto text-center">
+      <h1 class="display-1">Music Jukebox</h1>
     </div>
     <div class="container-fluid">
       <div class="card-deck mx-auto"></div>
@@ -29,6 +29,10 @@
       <hr>
       <p class="mb-0">Check the <b>inspector console</b> for any errors that may have occurred.</p>
     </div>
+
+    <footer class="pt-4 text-center">
+        <a class="display-4" href="https://github.com/skluck/jukebox">skluck/jukebox</a>
+    </footer>
 
     <script
         src="https://code.jquery.com/jquery-3.3.1.min.js"
@@ -48,7 +52,7 @@
             let contents = '';
             if (id.length > 0) {
                 contents = `<iframe
-                    src="https://www.youtube.com/embed/${id}?playlist=${id}&loop=1&showinfo=0&controls=0"
+                    src="https://www.youtube.com/embed/${id}?loop=1&showinfo=0&playlist=${id}"
                     frameborder="0"
                     width="100%"
                     height="100%;"
