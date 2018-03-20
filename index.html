@@ -30,7 +30,7 @@
       <p class="mb-0">Check the <b>inspector console</b> for any errors that may have occurred.</p>
     </div>
 
-    <footer class="pt-4 text-center">
+    <footer class="my-4 text-center">
         <a class="display-4" href="https://github.com/skluck/jukebox">skluck/jukebox</a>
     </footer>
 
@@ -74,9 +74,9 @@
                 $(renderSong(id, videos[id])).appendTo('.card-deck');
             }
 
-            //for (let j = i % 3; j > 0; j--) {
-            //    $(renderSong('', 'No song selected')).appendTo('.card-deck');
-            //}
+            for (let j = i % 3; j >= 0; j--) {
+                $(renderSong('', 'No song selected')).appendTo('.card-deck');
+            }
 
             $('.alert').remove();
         }
