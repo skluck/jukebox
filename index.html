@@ -6,21 +6,85 @@
 
     <title>Music Jukebox</title>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link
+        rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.plyr.io/3.2.4/plyr.css"
+        integrity="sha384-tKsr/bnyR3R5YNCrE2Ra49pOHexH/74Holn+2I6WYK/U6etTykN4CxViGrlV+ul1"
+        crossorigin="anonymous">
+
     <style>
-        .card-deck { display:flex; flex-wrap: wrap; justify-content: space-between; }
-        .card-deck .card { width: 30em; flex: 0 1 auto; }
-        .card-body { margin-bottom:-.35em; height:17em; }
+        .card { max-width: 50em; }
+
+        .playlist {
+            max-width: 70em;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .media {
+            flex: 1 0 auto;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        @media (min-width: 700px) {
+            .playlist { display: flex; }
+            .media { width: 45%; }
+        }
+
+        .media:hover {
+            cursor: pointer;
+            background-color: #6c757d;  /* .bg-secondary */
+            color: #f8f9fa;             /* .text-light */
+        }
+        .media:active {
+            background-color: #007bff;  /* .bg-primary */
+            color: #f8f9fa;             /* .text-light */
+        }
+
+        .media-selected {
+            background-color: #343a40;  /* .bg-dark */
+            color: #f8f9fa;             /* .text-light */
+        }
+        .media-selected:active {
+            background-color: #dc3545;  /* .bg-danger */
+            color: #f8f9fa;             /* .text-light */
+        }
+
+        .cropped-thumbnail {
+            overflow: hidden;
+            width: 120px;
+            height: 66px;
+        }
+        .cropped-thumbnail img {
+            width: 120px;
+            height: 90px;
+            margin: -12px 0 -12px 0;
+        }
     </style>
   </head>
 
   <body>
 
-    <div class="px-3 py-3 mx-auto text-center">
+    <div class="p-3 mx-auto text-center">
       <h1 class="display-1">Music Jukebox</h1>
     </div>
     <div class="container-fluid">
-      <div class="card-deck mx-auto"></div>
+        <div class="card text-white bg-dark mx-auto">
+          <div class="plyr__video-embed" id="player"></div>
+
+          <div class="card-body">
+            <h2 class="card-title"></h2>
+          </div>
+        </div>
+
+      <ul class="list-unstyled playlist my-5 mx-auto"></ul>
     </div>
 
     <div class="alert alert-danger mx-5">
@@ -39,47 +103,90 @@
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
     <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script
         src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
+    <script
+        src="https://cdn.plyr.io/3.2.4/plyr.js"
+        integrity="sha384-evOhnRMJFxTl3/arPubKpQ10F2JnNCrr6zByV3ntQ0WY6kFuPFKFmsYwNdXKpEh2"
+        crossorigin="anonymous"></script>
 
     <script>
-        function renderSong(id, title) {
-            let contents = '';
-            if (id.length > 0) {
-                contents = `<iframe
-                    src="https://www.youtube.com/embed/${id}?playlist=${id}&loop=1&showinfo=0"
-                    frameborder="0"
-                    allowfullscreen="allowfullscreen"
-                    width="100%"
-                    height="100%;"
-                    ></iframe>`;
+        let jukeboxPlayer;
+
+        function renderSong(id, artist, title) {
+            return `<li class="media my-2 p-2" data-track="${id}">
+                <div class="cropped-thumbnail mr-3">
+                    <img src="https://img.youtube.com/vi/${id}/default.jpg">
+                </div>
+
+                <div class="media-body my-auto">
+                    <h5 class="mt-0 mb-1">${artist}</h5>
+                    <p class="p-0 m-0">${title}</p>
+                </div>
+            </li>`;
+        }
+
+        function renderYoutubeFrame(id) {
+            return `<iframe
+                src="http://www.youtube.com/embed/${id}?playlist=${id}&loop=1&showinfo=0&playsinline=1&modestbranding=1&enablejsapi=1"
+                frameborder="0"
+                allowfullscreen
+                allowtransparency
+                width="100%"
+                height="100%;"
+                ></iframe>`;
+        }
+
+        function selectSong(id) {
+            let $frame = $('#player iframe');
+            if ($frame.length === 0) {
+                $(renderYoutubeFrame(id)).appendTo('#player');
+                jukeboxPlayer = new Plyr('#player', {
+                    loop: { active: true },
+                    autoplay: true
+                });
             }
 
-            return `<div class="card mb-4 box-shadow p-0">
-                <div class="card-header">
-                    <h4 class="my-0 font-weight-normal">${title}</h4>
-                </div>
-                <div class="card-body p-0">${contents}</div>
-            </div>`;
+            $('.media').removeClass('media-selected');
+
+            let $track = $(`[data-track="${id}"]`);
+            if ($track.length > 0) {
+                $track.addClass('media-selected');
+
+                let artist = $track.find('.media-body h5').text(),
+                    song = $track.find('.media-body p').text();
+
+                $('.card .card-title').text(`${artist} - ${song}`);
+                jukeboxPlayer.source = {
+                    type: 'video',
+                    sources: [
+                        { src: id, provider: 'youtube' },
+                    ]
+                };
+            }
+        }
+
+        function playSong() {
+            let $track = $(this);
+
+            if ($track.hasClass('media-selected')) {
+                jukeboxPlayer.stop();
+                $track.removeClass('media-selected')
+            } else {
+                selectSong($track.data('track'));
+            }
         }
 
         function parsePlaylist(videos) {
-            let i = 0;
-            for (const id in videos) {
-                i++;
-                $(renderSong(id, videos[id])).appendTo('.card-deck');
-            }
-
-            for (let j = i % 3; j >= 0; j--) {
-                $(renderSong('', 'No song selected')).appendTo('.card-deck');
+            for (const track of videos) {
+                $(renderSong(track.id, track.artist, track.song))
+                    .appendTo('.playlist')
+                    .on('click', playSong);
             }
 
             $('.alert').remove();
+            selectSong(videos[0].id);
         }
 
         $.getJSON("playlist.json", parsePlaylist);
