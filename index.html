@@ -67,6 +67,44 @@
             height: 90px;
             margin: -12px 0 -12px 0;
         }
+
+        .checkbox--switch__pill {
+            width: 48px;
+            height: 24px;
+            position: absolute;
+            background-color: #999;
+            top: 0;
+            left: 0;
+            border-radius: 50px;
+        }
+        .checkbox--switch__pill:after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border-radius: 50px;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.1s;
+            background-color: white;
+        }
+
+        .checkbox--switch input[type="checkbox"] {
+            visibility: hidden;
+        }
+        .checkbox--switch input[type="checkbox"]:checked + .checkbox--switch__pill {
+            background-color: #28a745;
+        }
+        .checkbox--switch input[type="checkbox"]:checked + .checkbox--switch__pill:after {
+            left: 26px;
+        }
+
+        .checkbox--switch {
+            display: inline-block;
+            position: relative;
+            padding-left: 2em;
+        }
+
     </style>
   </head>
 
@@ -81,6 +119,10 @@
 
           <div class="card-body">
             <h2 class="card-title"></h2>
+            <label for="jukebox_mode" class="checkbox--switch">
+                <input type="checkbox" id="jukebox_mode" value="1">
+                <b class="checkbox--switch__pill"></b>Jukebox mode (Cycle through all songs)
+            </label>
           </div>
         </div>
 
@@ -129,22 +171,41 @@
 
         function renderYoutubeFrame(id) {
             return `<iframe
-                src="http://www.youtube.com/embed/${id}?playlist=${id}&loop=1&showinfo=0&playsinline=1&modestbranding=1&enablejsapi=1"
+                src="http://www.youtube.com/embed/${id}?playlist=${id}&showinfo=0&playsinline=1&modestbranding=1&enablejsapi=1"
                 frameborder="0"
                 allowfullscreen
                 allowtransparency
+                allow="autoplay"
                 width="100%"
                 height="100%;"
                 ></iframe>`;
         }
 
-        function selectSong(id) {
+        function selectSong(id, autoplay) {
             let $frame = $('#player iframe');
             if ($frame.length === 0) {
                 $(renderYoutubeFrame(id)).appendTo('#player');
                 jukeboxPlayer = new Plyr('#player', {
-                    loop: { active: true },
-                    autoplay: true
+                    loop: { active: false },
+                    autoplay: false
+                });
+
+                jukeboxPlayer.on('ended', event => {
+                    let $track = $('.media-selected'),
+                        $firstTrack = $track.parent().find(">:first-child");
+
+                    if ($track.length > 0) {
+                        if ($('#jukebox_mode').is(':checked')) {
+                            let $next = $track.next('[data-track]');
+                            if ($next.length > 0) {
+                                selectSong($next.data('track'), true);
+                            } else {
+                                selectSong($firstTrack.data('track'), true);
+                            }
+                        } else {
+                            jukeboxPlayer.restart();
+                        }
+                    }
                 });
             }
 
@@ -158,13 +219,23 @@
                     song = $track.find('.media-body p').text();
 
                 $('.card .card-title').text(`${artist} - ${song}`);
-                jukeboxPlayer.source = {
-                    type: 'video',
-                    sources: [
-                        { src: id, provider: 'youtube' },
-                    ]
-                };
+                switchPlyrSong(id, autoplay);
             }
+        }
+
+        function switchPlyrSong(id, autoplay) {
+            jukeboxPlayer.source = {
+                type: 'video',
+                sources: [
+                    { src: id, provider: 'youtube' },
+                ]
+            };
+
+            if (autoplay) {
+                setTimeout(() => {
+                    jukeboxPlayer.play();
+                }, 1500);
+            };
         }
 
         function playSong() {
@@ -174,7 +245,7 @@
                 jukeboxPlayer.stop();
                 $track.removeClass('media-selected')
             } else {
-                selectSong($track.data('track'));
+                selectSong($track.data('track'), true);
             }
         }
 
@@ -186,7 +257,7 @@
             }
 
             $('.alert').remove();
-            selectSong(videos[0].id);
+            selectSong(videos[0].id, false);
         }
 
         $.getJSON("playlist.json", parsePlaylist);
