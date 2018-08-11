@@ -253,6 +253,10 @@
 
         function parsePlaylist(videos) {
             for (const track of videos) {
+                if (track.id === undefined || !track.id) continue;
+                if (track.artist === undefined || !track.artist) continue;
+                if (track.song === undefined || !track.song) continue;
+
                 $(renderSong(track.id, track.artist, track.song))
                     .appendTo('.playlist')
                     .on('click', playSong);
