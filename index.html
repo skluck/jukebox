@@ -221,7 +221,10 @@
                 let artist = $track.find('.media-body h5').text(),
                     song = $track.find('.media-body p').text();
 
-                $('.card .card-title').html(`${artist} - ${song} <a href="https://youtu.be/${id}" class="badge badge-light">youtube</a>`);
+                $('.card .card-title').html(`
+                    ${artist} - ${song}
+                    <a href="https://youtu.be/${id}" class="badge badge-secondary">youtube</a>
+                `);
                 switchPlyrSong(id, autoplay);
             }
         }
